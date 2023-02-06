@@ -54,10 +54,11 @@ function drawDrawBitrateLine(ctx, bitrate, color = 'gray', suffix = '', alignRig
   ctx.fillStyle = c;
 }
 
+let axisInterval = 50;
+const intervalPresets = [10, 20, 50, 100, 200, 300, 400, 500]
 function drawAxis(ctx) {
-  const interval = 50; // 50 kbps
   for (let i = 1; ; i++) {
-    const target = i * interval;
+    const target = i * axisInterval;
     if (target > maxBitrate) break;
     drawDrawBitrateLine(ctx, target);
   }
@@ -146,9 +147,16 @@ function step(ts) {
 
 fetch('packets.json').then(r => r.json()).then(p => {
   packets = p.map(p => parsePacket(p));
-  maxBitrate = findMaxBitrate(packets)
+  maxBitrate = findMaxBitrate(packets);
   averageBitrate = findAverageBitrate(packets);
-  heightScale = height / maxBitrate
+  heightScale = height / maxBitrate;
+  // Find the best interval for the axis
+  for (const preset of intervalPresets) {
+    if (preset > maxBitrate / 10) {
+      axisInterval = preset;
+      break;
+    }
+  }
   drawAxis(ctx)
 });
 
