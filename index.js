@@ -20,9 +20,9 @@ function runCommand(cmd) {
     const ch = childProcess.spawnSync(cmd[0], cmd.slice(1));
     const returnCode = ch.status;
     if (returnCode !== 0) {
-        console.log("Command failed with return code: " + returnCode);
-        console.log(ch.stdout?.toString());
-        console.log(ch.stderr?.toString());
+        console.warn(ch.stderr?.toString());
+        console.warn("Command failed with return code: " + returnCode);
+        console.warn("ffprobe return code is not 0. Please check the log above for more information. Sometimes bitrate-visualizer can still work, so we will continue. Just be aware that bitrate-visualizer may not work as expected.");
     }
     return ch.stdout?.toString()
 }
@@ -76,7 +76,6 @@ app.get('/title', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Open http://localhost:${port}/ for results`)
+    console.log(`Open http://localhost:${port} for results. Your browser should open shortly...`)
+    open(`http://localhost:${port}/`)
 })
-
-open(`http://localhost:${port}/`)
