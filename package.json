@@ -1,0 +1,21 @@
+{
+  "name": "bitrate-visualizer",
+  "version": "1.0.0",
+  "description": "Visualize bitrate changes of a song.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charlie0129/bitrate-visualizer.git"
+  },
+  "author": "Charlie Chiang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/charlie0129/bitrate-visualizer/issues"
+  },
+  "homepage": "https://github.com/charlie0129/bitrate-visualizer#readme",
+  "dependencies": {
+    "arg": "^5.0.2",
+    "express": "^4.18.2",
+    "open": "^8.4.0"
+  }
+}
