@@ -4,9 +4,13 @@ Bitrate Visualizer is a tool to visualize the bitrate of an audio file in realti
 
 It runs in command-line to analyze your song and then visualizes it in your browser for realtime playback. A GUI is possible, but it is not planned.
 
+Screenshot:
+
 <img width="921" alt="screenshot" src="https://user-images.githubusercontent.com/55270174/217046986-79c1d68b-0096-4698-bb65-921323158c0f.png">
 
-![gif-usage](https://user-images.githubusercontent.com/55270174/217047377-41d8bfd2-e002-4c33-bd93-c345453da07b.gif)
+GIF:
+
+![gif-usage](https://user-images.githubusercontent.com/55270174/217090489-f93ce152-654f-4616-bc1e-00c78a8c3d93.gif)
 
 
 ## Usage

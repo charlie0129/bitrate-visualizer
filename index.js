@@ -22,7 +22,7 @@ function runCommand(cmd) {
     if (returnCode !== 0) {
         console.warn(ch.stderr?.toString());
         console.warn("Command failed with return code: " + returnCode);
-        console.warn("ffprobe return code is not 0. Please check the log above for more information. Sometimes bitrate-visualizer can still work, so we will continue. Just be aware that bitrate-visualizer may not work as expected.");
+        console.warn("ffprobe return code is not 0. Please check the log above for more information. Just be aware that bitrate-visualizer may not work as expected.");
     }
     return ch.stdout?.toString()
 }
