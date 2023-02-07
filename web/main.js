@@ -59,7 +59,22 @@ function drawAxis(ctx) {
   }
 }
 
-function drawLine(ctx, pktIdx) {
+let lastTs = 0;
+let packetsPerSecond = 0;
+let framesPerSecond = 0;
+let frames = 0;
+let lastFrame = 0;
+let lastProcessedUniquePackets = 0;
+function drawLine(ctx, pktIdx, ts) {
+  if (ts - lastTs > 100) {
+    framesPerSecond = (frames - lastFrame) / (ts - lastTs) * 1000;
+    packetsPerSecond = (processedUniquePackets - lastProcessedUniquePackets) / (ts - lastTs) * 1000;
+    lastProcessedUniquePackets = processedUniquePackets;
+    lastFrame = frames;
+    lastTs = ts;
+  }
+  frames++;
+
   ctx.clearRect(0, 0, width, height);
 
   const p = packets[pktIdx];
@@ -89,13 +104,17 @@ function drawLine(ctx, pktIdx) {
   ctx.textAlign = "end";
   ctx.fillText(`${maxBitrate.toFixed(0)} kbps (max)`, width, 8);
   ctx.fillStyle = "gray";
-  ctx.fillText(`${p.ts.toFixed(3)}s / ${packets[packets.length - 1].ts.toFixed(3)}s`, width, height - 1);
-  ctx.fillText(`${(p.accumulatedSize / 1024).toFixed(0)} KB / ${(totalSize / 1024).toFixed(0)} KB`, width, height - 10);
+  ctx.fillText(`${p.ts.toFixed(3)}s / ${packets[packets.length - 1].ts.toFixed(3)}s`, width, height - 2);
+  ctx.fillText(`${(p.accumulatedSize / 1024).toFixed(0)} KB / ${(totalSize / 1024).toFixed(0)} KB`, width, height - 12);
+  ctx.fillText(`${Math.min(packetsPerSecond, framesPerSecond).toFixed(2)} graph updates/s`, width, height - 23);
+  ctx.fillText(`${packetsPerSecond.toFixed(2)} audio packets/s`, width, height - 33);
+  ctx.fillText(`${framesPerSecond.toFixed(2)} fps`, width, height - 43);
   ctx.fillStyle = "black";
   ctx.textAlign = "start";
 }
 
 let lastPacketIdx = 0;
+let processedUniquePackets = 0;
 function findPacketByTimestamp(ts) {
   for (let offset = 0; offset < packets.length; offset++) {
     let i = lastPacketIdx + offset;
@@ -104,6 +123,9 @@ function findPacketByTimestamp(ts) {
     }
     const p = packets[i];
     if (p.ts > ts) {
+      if (i !== lastPacketIdx) {
+        processedUniquePackets++;
+      }
       lastPacketIdx = i;
       return i;
     }
@@ -127,7 +149,7 @@ let animationFrameRef;
 
 player.onseeked = () => {
   lastPacketIdx = 0;
-  drawLine(ctx, findPacketByTimestamp(player.currentTime))
+  drawLine(ctx, findPacketByTimestamp(player.currentTime), window.performance.now())
 }
 
 player.onplay = () => {
@@ -141,7 +163,7 @@ player.onpause = () => {
 
 
 function step(ts) {
-  drawLine(ctx, findPacketByTimestamp(player.currentTime))
+  drawLine(ctx, findPacketByTimestamp(player.currentTime), ts)
   animationFrameRef = window.requestAnimationFrame(step);
 }
 
@@ -165,6 +187,7 @@ fetch('packets.json').then(r => r.json()).then(p => {
     }
   }
   drawAxis(ctx)
+  drawLine(ctx, findPacketByTimestamp(player.currentTime), window.performance.now())
 });
 
 fetch('title').then(r => r.text()).then(t => {
