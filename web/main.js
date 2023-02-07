@@ -26,11 +26,6 @@ function findMaxBitrate(packets) {
   return packets.reduce((max, p) => Math.max(max, p.bitrate), 0);
 }
 
-function findAverageBitrate(packets) {
-  const sum = packets.reduce((sum, p) => sum + p.bitrate, 0);
-  return sum / packets.length;
-}
-
 function drawDrawBitrateLine(ctx, bitrate, color = 'gray', suffix = '', alignRight = false) {
   if (bitrate > maxBitrate) {
     return
@@ -93,6 +88,10 @@ function drawLine(ctx, pktIdx) {
   // Max bitrate
   ctx.textAlign = "end";
   ctx.fillText(`${maxBitrate.toFixed(0)} kbps (max)`, width, 8);
+  ctx.fillStyle = "gray";
+  ctx.fillText(`${p.ts.toFixed(3)}s / ${packets[packets.length - 1].ts.toFixed(3)}s`, width, height - 1);
+  ctx.fillText(`${(p.accumulatedSize / 1024).toFixed(0)} KB / ${(totalSize / 1024).toFixed(0)} KB`, width, height - 10);
+  ctx.fillStyle = "black";
   ctx.textAlign = "start";
 }
 
@@ -120,6 +119,7 @@ const height = graph.getBoundingClientRect().height
 let ctx = setupCanvas(graph)
 let heightScale = 0;
 let maxBitrate = 0;
+let totalSize = 0;
 let averageBitrate = 0;
 let packets = [];
 let intervalId = 0;
@@ -146,9 +146,16 @@ function step(ts) {
 }
 
 fetch('packets.json').then(r => r.json()).then(p => {
-  packets = p.map(p => parsePacket(p));
+  packets = p.map(p => {
+    const pkt = parsePacket(p)
+    totalSize += p.size;
+    return {
+      ...pkt,
+      accumulatedSize: totalSize,
+    }
+  });
   maxBitrate = findMaxBitrate(packets);
-  averageBitrate = findAverageBitrate(packets);
+  averageBitrate = totalSize / packets[packets.length - 1].ts / 1024 * 8
   heightScale = height / maxBitrate;
   // Find the best interval for the axis
   for (const preset of intervalPresets) {

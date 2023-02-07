@@ -6,7 +6,7 @@ It runs in command-line to analyze your song and then visualizes it in your brow
 
 Screenshot:
 
-<img width="921" alt="screenshot" src="https://user-images.githubusercontent.com/55270174/217046986-79c1d68b-0096-4698-bb65-921323158c0f.png">
+<img width="827" alt="image" src="https://user-images.githubusercontent.com/55270174/217359192-e64c947b-cb39-46f2-aadb-5b7e45c97678.png">
 
 GIF:
 
