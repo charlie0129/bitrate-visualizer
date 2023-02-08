@@ -173,6 +173,20 @@ const elTitle = document.getElementById("audio_title");
 const elExtra = document.getElementById("extra");
 
 async function getPackets(file) {
+  heightScale = 0;
+  maxBitrate = 0;
+  totalSize = 0;
+  averageBitrate = 0;
+  packets = [];
+  lastPacketIdx = 0;
+  processedUniquePackets = 0;
+  lastTs = 0;
+  packetsPerSecond = 0;
+  framesPerSecond = 0;
+  frames = 0;
+  lastFrame = 0;
+  lastProcessedUniquePackets = 0;
+
   player.pause()
   elTitle.innerText = "Analyzing..."
 

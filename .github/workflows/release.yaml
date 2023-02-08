@@ -1,4 +1,4 @@
-name: Release
+name: Release Tauri
 on:
   push:
     tags:
@@ -7,6 +7,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
+          tagName: v__VERSION__ # This only works if your workflow triggers on new tags.
           releaseName: 'Bitrate Visualizer v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: 'See the assets to download and install'
           releaseDraft: true
