@@ -8,4 +8,4 @@ Bitrate Visualizer is a tool to visualize the bitrate of an audio file in realti
 
 Q: Why the prebuilt binary is so big?
 
-A: I bundled `ffprobe` in the app so you don't need to install it manually. Over 90%+ of the size is from `ffprobe`. The app itself is using Tauri, which is a very small framework and only have a few megabytes in size. You can build one without `ffprobe` if you want a smaller binary.
+A: I bundled `ffprobe` in the app so you don't need to install it manually. Over 90% of the size is from `ffprobe`. The app itself is built using Tauri, which has only a few megabytes in size. It is possible to build one without `ffprobe` to significantly reduce disk size footprint but that would sacrifice convenience since the user need to install `ffprobe` by himself.
