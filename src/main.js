@@ -189,12 +189,12 @@ async function getPackets(file) {
   let ret;
   try {
     ret = await command.execute();
-  } catch(e) {
+  } catch (e) {
     elTitle.innerText = "ffprobe failed! Do you have ffprobe installed or did you put a valid audio file?"
     elExtra.innerText = ret.stderr
     return
   }
-  
+
   console.log("done");
 
   if (ret.code !== 0) {

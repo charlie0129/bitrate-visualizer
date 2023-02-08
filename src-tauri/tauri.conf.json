@@ -1,14 +1,14 @@
 {
   "build": {
-    "beforeDevCommand": "",
-    "beforeBuildCommand": "",
+    "beforeDevCommand": "node ffprobe-bin/copy.cjs",
+    "beforeBuildCommand": "node ffprobe-bin/copy.cjs",
     "devPath": "../src",
     "distDir": "../src",
     "withGlobalTauri": true
   },
   "package": {
     "productName": "Bitrate Visualizer",
-    "version": "1.0.0"
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -25,7 +25,7 @@
           }
         ]
       },
-      "protocol":{
+      "protocol": {
         "asset": true
       }
     },

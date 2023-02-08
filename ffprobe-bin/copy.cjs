@@ -5,6 +5,7 @@
 
 const childProcess = require('child_process');
 const fs = require('fs')
+const path = require('path')
 const pathToFfprobe = require('ffprobe-static').path;
 
 let extension = ''
@@ -25,7 +26,7 @@ async function main() {
     }
     fs.copyFileSync(
         pathToFfprobe,
-        `ffprobe-${targetTriple}${extension}`
+        path.join(__dirname, `ffprobe-${targetTriple}${extension}`)
     )
 }
 

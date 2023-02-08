@@ -1,6 +1,6 @@
 [package]
 name = "bitrate-visualizer"
-version = "1.0.0"
+version = "0.1.0"
 description = "Visualize the bitrate distribution of a VBR audio file in realtime."
 authors = ["charlie0129"]
 license = "MIT"
