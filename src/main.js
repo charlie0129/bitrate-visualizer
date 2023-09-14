@@ -1,5 +1,7 @@
 const { listen } = window.__TAURI__.event
 const { Command } = window.__TAURI__.shell
+const { save } = window.__TAURI__.dialog
+const { writeBinaryFile } = window.__TAURI__.fs
 
 function setupCanvas(canvas) {
   // Get the device pixel ratio, falling back to 1.
@@ -19,6 +21,7 @@ function parsePacket(p) {
   return {
     ts: p.pts_time,
     bitrate: p.size * 8 / p.duration / 1024,
+    duration: p.duration,
   }
 }
 
@@ -109,9 +112,8 @@ function drawLine(ctx, pktIdx, ts) {
   ctx.fillStyle = "gray";
   ctx.fillText(`${p.ts.toFixed(3)}s / ${packets[packets.length - 1].ts.toFixed(3)}s`, width, height - 2);
   ctx.fillText(`${(p.accumulatedSize / 1024).toFixed(0)} KB / ${(totalSize / 1024).toFixed(0)} KB`, width, height - 12);
-  ctx.fillText(`${Math.min(packetsPerSecond, framesPerSecond).toFixed(2)} graph updates/s`, width, height - 23);
-  ctx.fillText(`${packetsPerSecond.toFixed(2)} audio packets/s`, width, height - 33);
-  ctx.fillText(`${framesPerSecond.toFixed(2)} fps`, width, height - 43);
+  ctx.fillText(`${packetsPerSecond.toFixed(2)} packets/s`, width, height - 23);
+  // ctx.fillText(`${framesPerSecond.toFixed(2)} fps`, width, height - 43);
   ctx.fillStyle = "black";
   ctx.textAlign = "start";
 }
@@ -274,3 +276,129 @@ async function getPackets(file) {
 listen('tauri://file-drop', e => {
   getPackets(e.payload[0])
 })
+
+// Listen for save event, which will save the bitrate image.
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    console.log("You pressed ctrl+s")
+    // Prevent the Save dialog to open
+    e.preventDefault();
+    saveImage(packets);
+  }
+});
+
+function saveImage(packets) {
+  const width = packets.length;
+  const height = 600;
+  const xAxisAdd = 20;
+  const cvs = document.getElementById("whole_song_visual");
+  cvs.width = width;
+  cvs.height = height + xAxisAdd;
+  const ctx = cvs.getContext('2d');
+
+  const maxBitrate = findMaxBitrate(packets);
+  const heightScale = height / maxBitrate;
+
+  function drawDrawBitrateLine(bitrate, color = 'gray', suffix = '', alignRight = false) {
+    const y = height - bitrate * heightScale;
+    const c = ctx.strokeStyle
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y)
+    ctx.stroke();
+    if (alignRight) {
+      ctx.textAlign = "end";
+      ctx.fillText(`${bitrate.toFixed(0)} kbps${suffix}`, width, y - 2);
+      ctx.textAlign = "start";
+    } else {
+      ctx.fillText(`${bitrate.toFixed(0)} kbps${suffix}`, 0, y - 2);
+    }
+    ctx.strokeStyle = c;
+    ctx.fillStyle = c;
+  }
+
+  // fill background
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, width, height + xAxisAdd);
+  ctx.fill()
+
+  // determine x axis interval
+  let tsInterval = 1;
+  for (const i of [1, 2, 3, 4, 5, 7, 8, 9, 10]) {
+    const p = packets[Math.floor(packets.length / 2)]
+    if (i / p.duration > 40) {
+      tsInterval = i;
+      break;
+    }
+  }
+
+  let lastTs = 0;
+  for (let i = 0; i < width; i++) {
+    const p = packets[i];
+    ctx.fillStyle = "black";
+    ctx.strokeStyle = "black";
+    ctx.beginPath();
+    ctx.moveTo(i, height - p.bitrate * heightScale);
+    ctx.lineTo(i, height)
+    ctx.stroke();
+    if (p.ts - lastTs >= tsInterval) {
+      ctx.fillStyle = "gray";
+      ctx.strokeStyle = "gray";
+      ctx.beginPath();
+      ctx.moveTo(i, height + 4);
+      ctx.lineTo(i, height)
+      ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillText(`${(p.ts).toFixed(1)}s`, i, height + 14);
+      ctx.textAlign = "start";
+      lastTs = p.ts;
+    }
+  }
+
+  // Draw axis
+  for (let i = 1; ; i++) {
+    const target = i * axisInterval;
+    if (target > maxBitrate) break;
+    drawDrawBitrateLine(target);
+  }
+  // Average bitrate
+  drawDrawBitrateLine(averageBitrate, 'green', ' (avg)', true);
+
+  ctx.strokeStyle = "black";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, height)
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(width, 0)
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(width, 0);
+  ctx.lineTo(width, height)
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, height);
+  ctx.lineTo(width, height)
+  ctx.stroke();
+
+  cvs.toBlob(async (b) => {
+    try {
+      const contents = await b.arrayBuffer()
+      const filePath = await save({
+        filters: [{
+          name: 'Image',
+          extensions: ['png']
+        }]
+      });
+      await writeBinaryFile(filePath, contents);
+    } catch (e) {
+      console.error(e)
+    }
+    cvs.width = 0;
+    cvs.height = 0;
+  }, "image/png", 1);
+
+}

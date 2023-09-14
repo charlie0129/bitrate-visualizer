@@ -8,11 +8,14 @@
   },
   "package": {
     "productName": "Bitrate Visualizer",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "all": true
+      },
       "shell": {
         "all": false,
         "open": true,
@@ -24,6 +27,9 @@
             "args": true
           }
         ]
+      },
+      "fs": {
+        "writeFile": true
       },
       "protocol": {
         "asset": true
@@ -73,7 +79,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 620,
         "resizable": false,
         "title": "Bitrate Visualizer",
         "width": 800
